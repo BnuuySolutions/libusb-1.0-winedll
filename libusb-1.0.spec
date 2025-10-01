@@ -18,3 +18,13 @@
 @ cdecl libusb_release_interface(ptr long)                            WinLibusb_release_interface
 @ cdecl libusb_set_configuration(ptr long)                            WinLibusb_set_configuration
 @ cdecl libusb_set_debug(ptr long)                                    WinLibusb_set_debug
+
+# Hidapi
+
+@ cdecl hid_open(long long ptr)                                        WinHid_open
+@ cdecl hid_write(ptr ptr long)                                        WinHid_write
+@ cdecl hid_read_timeout(ptr ptr long ptr long)                        WinHid_read_timeout
+@ cdecl hid_read(ptr ptr long)                                         WinHid_read
+@ cdecl hid_send_feature_report(ptr ptr long)                          WinHid_send_feature_report
+@ cdecl hid_get_feature_report(ptr ptr long)                           WinHid_get_feature_report
+@ cdecl hid_close(ptr)                                                 WinHid_close

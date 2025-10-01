@@ -1,7 +1,9 @@
+#include <stdio.h>
 #undef _WIN32
 #undef __CYGWIN__
 #undef _MSC_VER
 #include <libusb-1.0/libusb.h>
+#include <hidapi/hidapi.h>
 
 void                   __cdecl WinLibusb_close(libusb_device_handle *a){libusb_close(a);}
 void                   __cdecl WinLibusb_free_config_descriptor(struct libusb_config_descriptor *a){libusb_free_config_descriptor(a);}
@@ -23,3 +25,102 @@ int                    __cdecl WinLibusb_cancel_transfer(struct libusb_transfer 
 int                    __cdecl WinLibusb_release_interface(libusb_device_handle *a,int b){return libusb_release_interface(a,b);}
 int                    __cdecl WinLibusb_set_configuration(libusb_device_handle *a,int b){return libusb_set_configuration(a,b);}
 void                   __cdecl WinLibusb_set_debug(libusb_context *a, int b){libusb_set_debug(a,b);}
+
+const uint8_t INPUT_REPORT_CRC32_SEED = 0xa1;
+const uint8_t OUTPUT_REPORT_CRC32_SEED = 0xa2;
+const uint8_t FEATURE_REPORT_CRC32_SEED = 0xa3;
+
+const uint32_t CRC_POLYNOMIAL = 0xedb88320;
+static uint32_t
+crc32_le(uint32_t crc, uint8_t const *p, size_t len)
+{
+	int i;
+	crc ^= 0xffffffff;
+	while (len--) {
+		crc ^= *p++;
+		for (i = 0; i < 8; i++)
+			crc = (crc >> 1) ^ ((crc & 1) ? CRC_POLYNOMIAL : 0);
+	}
+	return crc ^ 0xffffffff;
+}
+
+// Hidapi
+size_t numberOfReads = 0;
+hid_device *           __cdecl WinHid_open(unsigned short a, unsigned short b, const wchar_t *c){return hid_open(a,b,c);}
+int                    __cdecl WinHid_write(hid_device *a, const unsigned char *b, size_t c){return hid_write(a,b,c);}
+int                    __cdecl WinHid_read_timeout(hid_device *a, unsigned char *b, size_t c, int d){
+    numberOfReads++;
+    int e = hid_read_timeout(a,b,c,d);
+
+    if (e == 78 && numberOfReads > 30)
+    {
+        b[33] = 0x01;
+    }
+
+    fprintf(stderr, "read\n");
+    for (int i = 0; i < d; i++) {
+        fprintf(stderr, "%02x ", b[i]);
+    }
+    fprintf(stderr, "\n");
+
+    return e;
+}
+int                    __cdecl WinHid_read(hid_device *a, unsigned char *b, size_t c){
+    numberOfReads++;
+    int d = hid_read(a,b,c);
+
+    if (d == 78 && numberOfReads > 30)
+    {
+        b[53] = 0x01;
+        uint32_t crc = crc32_le(0, &INPUT_REPORT_CRC32_SEED, 1);
+	    crc = crc32_le(crc, (uint8_t *)b, 78 - 4);
+
+        *(uint32_t*)(b + 74) = crc;
+    }
+
+    return d;
+}
+size_t numberOfFeatureReports = 0;
+int                    __cdecl WinHid_send_feature_report(hid_device *a, const unsigned char *b, size_t c){
+    numberOfFeatureReports++;
+
+    if (numberOfFeatureReports > 30)
+    {
+        return 0;
+    }
+
+    fprintf(stderr, "Sending feature report\n");
+    for (int i = 0; i < c; i++) {
+        fprintf(stderr, "%02x ", b[i]);
+    }
+    fprintf(stderr, "\n");
+
+    return hid_send_feature_report(a,b,c);
+}
+int                    __cdecl WinHid_get_feature_report(hid_device *a, unsigned char *b, size_t c){
+    numberOfFeatureReports++;
+
+    if (numberOfFeatureReports > 30)
+    {
+        return 0;
+    }
+
+    fprintf(stderr, "Getting feature report\n");
+    for (int i = 0; i < c; i++) {
+        fprintf(stderr, "%02x ", b[i]);
+    }
+    fprintf(stderr, "\n");
+    int d = hid_get_feature_report(a,b,c);
+    if (d < 0) {
+        fprintf(stderr, "Error getting feature report\n");
+    }
+
+    fprintf(stderr, "Got feature report\n");
+    for (int i = 0; i < d; i++) {
+        fprintf(stderr, "%02x ", b[i]);
+    }
+    fprintf(stderr, "\n");
+
+    return d;
+}
+void                   __cdecl WinHid_close(hid_device *a){hid_close(a);}
