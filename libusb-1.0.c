@@ -14,12 +14,18 @@ const char*            __cdecl WinLibusb_error_name(int a){return libusb_error_n
 void                   __cdecl WinLibusb_exit(libusb_context *a){return libusb_exit(a);}
 int                    __cdecl WinLibusb_init(libusb_context ** a){return libusb_init(a);}
 int                    __cdecl WinLibusb_bulk_transfer(libusb_device_handle *a, unsigned char b, unsigned char *c, int d, int *e, unsigned int f){return libusb_bulk_transfer(a,b,c,d,e, f);}
+int                    __cdecl WinLibusb_interrupt_transfer(libusb_device_handle *a, unsigned char b, unsigned char *c, int d, int *e, unsigned int f){return libusb_interrupt_transfer(a,b,c,d,e,f);}
 int                    __cdecl WinLibusb_control_transfer(libusb_device_handle *a,uint8_t b, uint8_t c, uint16_t d, uint16_t e,unsigned char *f, uint16_t g, unsigned int h){return libusb_control_transfer(a,b,c, d,e,f,g,h);}
 int                    __cdecl WinLibusb_set_interface_alt_setting(libusb_device_handle *a , int b, int c){return libusb_set_interface_alt_setting(a,b,c);}
 void                   __cdecl WinLibusb_get_device(libusb_device_handle *a){libusb_get_device(a);}
 int                    __cdecl WinLibusb_claim_interface(libusb_device_handle *a,int b){return libusb_claim_interface(a,b);}
 libusb_device_handle * __cdecl WinLibusb_open_device_with_vid_pid(libusb_context *a, uint16_t b, uint16_t c){return libusb_open_device_with_vid_pid(a,b,c);}
+int                    __cdecl WinLibusb_reset_device(struct libusb_device_handle *a){return libusb_reset_device(a);}
 int                    __cdecl WinLibusb_cancel_transfer(struct libusb_transfer *a){return libusb_cancel_transfer(a);}
 int                    __cdecl WinLibusb_release_interface(libusb_device_handle *a,int b){return libusb_release_interface(a,b);}
 int                    __cdecl WinLibusb_set_configuration(libusb_device_handle *a,int b){return libusb_set_configuration(a,b);}
 void                   __cdecl WinLibusb_set_debug(libusb_context *a, int b){libusb_set_debug(a,b);}
+int                    __cdecl WinLibusb_kernel_driver_active(libusb_device_handle *a, int b){return libusb_kernel_driver_active(a,b);}
+int                    __cdecl WinLibusb_detach_kernel_driver(libusb_device_handle *a, int b){return libusb_detach_kernel_driver(a,b);}
+int                    __cdecl WinLibusb_attach_kernel_driver(libusb_device_handle *a, int b){return libusb_attach_kernel_driver(a,b);}
+int                    __cdecl WinLibusb_set_auto_detach_kernel_driver(libusb_device_handle *a, int b){return libusb_set_auto_detach_kernel_driver(a,b);}
