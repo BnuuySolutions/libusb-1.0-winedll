@@ -54,6 +54,7 @@ void                   WIN_ABI WinLibusb_free_device_list(libusb_device **a, int
 ssize_t                WIN_ABI WinLibusb_get_device_list(libusb_context *a,libusb_device ***b){return libusb_get_device_list(a,b);}
 uint8_t                WIN_ABI WinLibusb_get_bus_number(libusb_device *a){return libusb_get_bus_number(a);}
 int                    WIN_ABI WinLibusb_get_port_numbers(libusb_device *a, uint8_t *b, int c){return libusb_get_port_numbers(a,b,c);}
+int                    WIN_ABI WinLibusb_get_device_speed(libusb_device *a){return libusb_get_device_speed(a);}
 const char*            WIN_ABI WinLibusb_error_name(int a){return libusb_error_name(a);}
 int                    WIN_ABI WinLibusb_handle_events(libusb_context *a){return libusb_handle_events(a);}
 int                    WIN_ABI WinLibusb_handle_events_completed(libusb_context *a, int *b){return libusb_handle_events_completed(a,b);}

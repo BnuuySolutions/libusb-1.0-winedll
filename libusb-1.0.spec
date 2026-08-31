@@ -9,6 +9,7 @@
 @ cdecl libusb_get_device_list(ptr ptr)                               WinLibusb_get_device_list
 @ cdecl libusb_get_bus_number(ptr)                                    WinLibusb_get_bus_number
 @ cdecl libusb_get_port_numbers(ptr ptr long)                         WinLibusb_get_port_numbers
+@ cdecl libusb_get_device_speed(ptr)                                  WinLibusb_get_device_speed
 @ cdecl libusb_error_name(ptr)                                        WinLibusb_error_name
 @ cdecl libusb_handle_events(ptr)                                     WinLibusb_handle_events
 @ cdecl libusb_handle_events_completed(ptr ptr)                       WinLibusb_handle_events_completed
