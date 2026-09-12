@@ -35,3 +35,11 @@
 @ cdecl libusb_detach_kernel_driver(ptr long)                         WinLibusb_detach_kernel_driver
 @ cdecl libusb_attach_kernel_driver(ptr long)                         WinLibusb_attach_kernel_driver
 @ cdecl libusb_set_auto_detach_kernel_driver(ptr long)                WinLibusb_set_auto_detach_kernel_driver
+@ cdecl libusb_get_string_descriptor_ascii(ptr long ptr long)          WinLibusb_get_string_descriptor_ascii
+@ cdecl libusb_ref_device(ptr)                                         WinLibusb_ref_device
+@ cdecl libusb_unref_device(ptr)                                       WinLibusb_unref_device
+@ cdecl libusb_strerror(long)                                          WinLibusb_strerror
+@ cdecl libusb_get_configuration(ptr ptr)                              WinLibusb_get_configuration
+@ cdecl libusb_clear_halt(ptr long)                                    WinLibusb_clear_halt
+@ varargs libusb_set_option(ptr long)                                  WinLibusb_set_option
+

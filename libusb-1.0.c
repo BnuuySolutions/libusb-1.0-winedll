@@ -4,13 +4,29 @@
 #include <libusb-1.0/libusb.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdarg.h>
 
 #if defined(__x86_64__) || defined(_M_X64)
 #define WIN_ABI __attribute__((ms_abi))
+#define WIN_ABIV __attribute__((ms_abi))
+typedef __builtin_ms_va_list win_va_list;
+#define win_va_start(ap, last) __builtin_ms_va_start(ap, last)
+#define win_va_end(ap) __builtin_ms_va_end(ap)
+#define win_va_arg(ap, type) __builtin_va_arg(ap, type)
 #elif defined(__i386__) || defined(_M_IX86)
 #define WIN_ABI __attribute__((stdcall))
+#define WIN_ABIV __attribute__((cdecl))
+typedef va_list win_va_list;
+#define win_va_start(ap, last) va_start(ap, last)
+#define win_va_end(ap) va_end(ap)
+#define win_va_arg(ap, type) va_arg(ap, type)
 #else
 #define WIN_ABI
+#define WIN_ABIV
+typedef va_list win_va_list;
+#define win_va_start(ap, last) va_start(ap, last)
+#define win_va_end(ap) va_end(ap)
+#define win_va_arg(ap, type) va_arg(ap, type)
 #endif
 
 // Windows libusb callbacks use WINAPI which maps to ms_abi on x64
@@ -75,7 +91,7 @@ int                    WIN_ABI WinLibusb_bulk_transfer(libusb_device_handle *a, 
 int                    WIN_ABI WinLibusb_interrupt_transfer(libusb_device_handle *a, unsigned char b, unsigned char *c, int d, int *e, unsigned int f){return libusb_interrupt_transfer(a,b,c,d,e,f);}
 int                    WIN_ABI WinLibusb_control_transfer(libusb_device_handle *a,uint8_t b, uint8_t c, uint16_t d, uint16_t e,unsigned char *f, uint16_t g, unsigned int h){return libusb_control_transfer(a,b,c, d,e,f,g,h);}
 int                    WIN_ABI WinLibusb_set_interface_alt_setting(libusb_device_handle *a , int b, int c){return libusb_set_interface_alt_setting(a,b,c);}
-void                   WIN_ABI WinLibusb_get_device(libusb_device_handle *a){libusb_get_device(a);}
+struct libusb_device * WIN_ABI WinLibusb_get_device(libusb_device_handle *a){return libusb_get_device(a);}
 int                    WIN_ABI WinLibusb_open(libusb_device *a, libusb_device_handle **b){return libusb_open(a,b);}
 int                    WIN_ABI WinLibusb_claim_interface(libusb_device_handle *a,int b){return libusb_claim_interface(a,b);}
 libusb_device_handle * WIN_ABI WinLibusb_open_device_with_vid_pid(libusb_context *a, uint16_t b, uint16_t c){return libusb_open_device_with_vid_pid(a,b,c);}
@@ -109,3 +125,37 @@ int                    WIN_ABI WinLibusb_kernel_driver_active(libusb_device_hand
 int                    WIN_ABI WinLibusb_detach_kernel_driver(libusb_device_handle *a, int b){return libusb_detach_kernel_driver(a,b);}
 int                    WIN_ABI WinLibusb_attach_kernel_driver(libusb_device_handle *a, int b){return libusb_attach_kernel_driver(a,b);}
 int                    WIN_ABI WinLibusb_set_auto_detach_kernel_driver(libusb_device_handle *a, int b){return libusb_set_auto_detach_kernel_driver(a,b);}
+int                    WIN_ABI WinLibusb_get_string_descriptor_ascii(libusb_device_handle *a, uint8_t b, unsigned char *c, int d){return libusb_get_string_descriptor_ascii(a, b, c, d);}
+struct libusb_device * WIN_ABI WinLibusb_ref_device(libusb_device *a){return libusb_ref_device(a);}
+void                   WIN_ABI WinLibusb_unref_device(libusb_device *a){libusb_unref_device(a);}
+const char*            WIN_ABI WinLibusb_strerror(int a){return libusb_strerror(a);}
+int                    WIN_ABI WinLibusb_get_configuration(libusb_device_handle *a, int *b){return libusb_get_configuration(a, b);}
+int                    WIN_ABI WinLibusb_clear_halt(libusb_device_handle *a, unsigned char b){return libusb_clear_halt(a, b);}
+int                    WIN_ABIV WinLibusb_set_option(libusb_context *a, int b, ...){
+    win_va_list ap;
+    win_va_start(ap, b);
+    int ret;
+    switch (b) {
+    case LIBUSB_OPTION_LOG_LEVEL: {
+        int level = win_va_arg(ap, int);
+        ret = libusb_set_option(a, (enum libusb_option)b, level);
+        break;
+    }
+    case LIBUSB_OPTION_USE_USBDK:
+    case LIBUSB_OPTION_NO_DEVICE_DISCOVERY:
+        ret = libusb_set_option(a, (enum libusb_option)b);
+        break;
+    case LIBUSB_OPTION_LOG_CB: {
+        void *cb = win_va_arg(ap, void *);
+        ret = libusb_set_option(a, (enum libusb_option)b, cb);
+        break;
+    }
+    default: {
+        void *arg = win_va_arg(ap, void *);
+        ret = libusb_set_option(a, (enum libusb_option)b, arg);
+        break;
+    }
+    }
+    win_va_end(ap);
+    return ret;
+}
